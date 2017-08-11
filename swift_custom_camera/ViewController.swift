@@ -33,8 +33,8 @@ class ViewController: UIViewController,UIAlertViewDelegate {
 
         isJurisdiction = canUserCamear()
         if isJurisdiction! {
-            customCamera()
-            customUI()
+            customCamera()  //自定义相机
+            customUI()  //自定义相机按钮
         }
         else {
             return
