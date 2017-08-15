@@ -15,7 +15,7 @@ struct kScreenWH {
     static let height = UIScreen.main.bounds.size.height
 }
 
-class ViewController: UIViewController,UIAlertViewDelegate {
+class ViewController: UIViewController,UIAlertViewDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate {
     var device:AVCaptureDevice!   //获取设备:如摄像头
     var input:AVCaptureDeviceInput!   //输入流
     var photoOutput:AVCaptureStillImageOutput! //输出流
@@ -134,6 +134,34 @@ class ViewController: UIViewController,UIAlertViewDelegate {
         cancelBtn.setTitle("取消", for: .normal)
         cancelBtn.addTarget(self, action: #selector(self.cancelActin), for: .touchUpInside)
         view.addSubview(cancelBtn)
+        
+        //相册按钮
+        let photoAlbumBtn  = UIButton.init()
+        photoAlbumBtn.frame = CGRect.init(x: kScreenWH.width - 70, y: kScreenWH.height - 100, width: 60, height: 60)
+        photoAlbumBtn.setImage(UIImage.init(named: "相册"), for: .normal)
+        photoAlbumBtn.addTarget(self, action: #selector(self.photoAlbumAction), for: .touchUpInside)
+        view.addSubview(photoAlbumBtn)
+        
+    }
+    //MARK: 打开相册按钮
+    func photoAlbumAction(){
+        //判断设置是否支持图片库
+        if UIImagePickerController.isSourceTypeAvailable(.photoLibrary){
+            //初始化图片控制器
+            let picker = UIImagePickerController()
+            //设置代理
+            picker.delegate = self
+            //指定图片控制器类型
+            picker.sourceType = UIImagePickerControllerSourceType.photoLibrary
+            //设置是否允许编辑
+             picker.allowsEditing = false
+            //弹出控制器，显示界面
+            self.present(picker, animated: true, completion: {
+                () -> Void in
+            })
+        }else{
+            print("读取相册错误")
+        }
     }
     //MARK:前后摄像头更改事件
     func changeCamera(){
@@ -177,6 +205,21 @@ class ViewController: UIViewController,UIAlertViewDelegate {
             self.imageView?.image = self.image
             print("image size = \(NSStringFromCGSize((self.image?.size)!))")
         })
+    }
+    //MARK:选择图片成功后代理
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage{
+            // 将图片显示给UIImageView
+            self.session.stopRunning()
+            self.imageView = UIImageView(frame: self.previewLayer.frame)
+            self.view.insertSubview(self.imageView!, belowSubview: self.photoButton!)
+            self.imageView?.layer.masksToBounds = true
+            self.imageView?.image = image
+        }else{
+            print("pick image wrong")
+        }
+        // 收回图库选择界面
+        self.dismiss(animated: true, completion: nil)
     }
     //MARK: 闪光灯开关
     func flashAction(){
